@@ -50,7 +50,6 @@ class GuestService:
             )
             self.guests.append(guest)
 
-            # Guardamos el huésped en la base de datos
             self.repo.create_guest_repositorio(guest)
             return guest
         except ValueError as e:
@@ -61,7 +60,6 @@ class GuestService:
 
     def get_guests(self):
         try:
-            # Recuperamos todos los huéspedes de la base de datos
             guests_data = self.repo.get_all_guests()
             if not guests_data:
                 print("No se encontraron huéspedes.")
@@ -70,15 +68,20 @@ class GuestService:
             print(f"Error al obtener huéspedes: {e}")
         return []
 
+    def get_guest_by_id(self, guest_id):
+        try:
+            return self.repo.get_guest_by_id(guest_id)
+        except Exception as e:
+            print(f"Error al buscar huésped por ID: {e}")
+            return None
+
     def update_guest(self, guest_id, updated_data):
         try:
-            # Obtenemos el huésped por ID
             guest = self.repo.get_guest_by_id(guest_id)
             if not guest:
                 print("Huésped no encontrado.")
                 return None
 
-            # Actualizamos los campos del huésped
             guest.name = updated_data.get('name', guest.name)
             guest.last_name = updated_data.get('last_name', guest.last_name)
             guest.phone = updated_data.get('phone', guest.phone)
@@ -88,8 +91,7 @@ class GuestService:
             guest.origin = updated_data.get('origin', guest.origin)
             guest.occupation = updated_data.get('occupation', guest.occupation)
 
-            # Guardamos los cambios en la base de datos
-            self.repo.update_guest(guest)
+            self.repo.update_guest_repositorio(guest)
             return guest
         except Exception as e:
             print(f"Error al actualizar huésped: {e}")
@@ -97,15 +99,13 @@ class GuestService:
 
     def delete_guest(self, guest_id):
         try:
-            # Obtenemos el huésped por ID
             guest = self.repo.get_guest_by_id(guest_id)
             if not guest:
                 print("Huésped no encontrado.")
                 return None
 
-            # Eliminamos el huésped de la base de datos
-            self.repo.delete_guest(guest)
-            self.guests.remove(guest)  # También lo eliminamos de la lista local
+            self.repo.delete_guest_repositorio(guest_id)
+            self.guests = [g for g in self.guests if g.id != guest_id]
             return guest
         except Exception as e:
             print(f"Error al eliminar huésped: {e}")
@@ -116,3 +116,4 @@ class GuestService:
             print("No hay huéspedes registrados.")
         for guest in self.guests:
             print(guest)
+
