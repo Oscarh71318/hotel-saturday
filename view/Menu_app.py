@@ -92,7 +92,18 @@ class MenuApp:
                 origin = input(f"Origen ({guest.origin}): ") or guest.origin
                 occupation = input(f"Ocupación ({guest.occupation}): ") or guest.occupation
 
-                updated_data = [id, name, last_name, phone, mail, password, status, origin, occupation]
+                # Cambia la lista a un diccionario
+                updated_data = {
+                    'name': name,
+                    'last_name': last_name,
+                    'phone': phone,
+                    'mail': mail,
+                    'password': password,
+                    'status': status,
+                    'origin': origin,
+                    'occupation': occupation
+                }
+
                 updated_guest = self.guest_service.update_guest(id, updated_data)
                 if updated_guest:
                     print(f"Huésped {updated_guest.name} {updated_guest.last_name} actualizado correctamente.")

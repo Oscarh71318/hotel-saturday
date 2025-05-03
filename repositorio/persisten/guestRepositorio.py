@@ -1,5 +1,6 @@
 from dominio.modelo.Guest import Guest
 from repositorio.conexion import Conexion
+
 class GuestRepositorio:
     def __init__(self, conexion: Conexion):
         self.conexion = conexion
@@ -39,25 +40,30 @@ class GuestRepositorio:
 
     def get_guest_by_id(self, guest_id):
         self.conexion.connect()
-        query = "SELECT * FROM usuarios WHERE id = %s"
-        result = self.conexion.fetch_query(query, (guest_id,))
-        if result:
-            guest_data = result[0]
-            query_guest = "SELECT * FROM huespedes WHERE id = %s"
-            result_guest = self.conexion.fetch_query(query_guest, (guest_id,))
-            if result_guest:
-                guest_info = result_guest[0]
-                return Guest(
-                    id=guest_data['id'],
-                    name=guest_data['name'],
-                    last_name=guest_data['last_name'],
-                    phone=guest_data['phone'],
-                    mail=guest_data['mail'],
-                    password=guest_data['password'],
-                    status=guest_data['status'],
-                    origin=guest_info['origin'],
-                    occupation=guest_info['occupation']
-                )
+        try:
+            query = "SELECT * FROM usuarios WHERE id = %s"
+            result = self.conexion.fetch_query(query, (guest_id,))
+            if result:
+                guest_data = result[0]
+                query_guest = "SELECT * FROM huespedes WHERE id = %s"
+                result_guest = self.conexion.fetch_query(query_guest, (guest_id,))
+                if result_guest:
+                    guest_info = result_guest[0]
+                    return Guest(
+                        id=guest_data['id'],
+                        name=guest_data['name'],
+                        last_name=guest_data['last_name'],
+                        phone=guest_data['phone'],
+                        mail=guest_data['mail'],
+                        password=guest_data['password'],
+                        status=guest_data['status'],
+                        origin=guest_info['origin'],
+                        occupation=guest_info['occupation']
+                    )
+        except Exception as e:
+            print("Error al obtener huésped:", e)
+        finally:
+            self.conexion.disconnect()
         return None
 
     def update_guest_repositorio(self, guest: Guest):
@@ -98,11 +104,13 @@ class GuestRepositorio:
     def delete_guest_repositorio(self, guest_id):
         self.conexion.connect()
         try:
-            query_user = "DELETE FROM usuarios WHERE id = %s"
-            self.conexion.execute_query(query_user, (guest_id,))
-
+            # Primero eliminar de huespedes por restricción de clave foránea
             query_guest = "DELETE FROM huespedes WHERE id = %s"
             self.conexion.execute_query(query_guest, (guest_id,))
+
+            # Luego eliminar de usuarios
+            query_user = "DELETE FROM usuarios WHERE id = %s"
+            self.conexion.execute_query(query_user, (guest_id,))
         except Exception as e:
             print("Error al eliminar huésped:", e)
         finally:
